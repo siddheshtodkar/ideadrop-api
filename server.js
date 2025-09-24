@@ -3,11 +3,15 @@ import cors from "cors"
 import dotenv from "dotenv"
 import router from "./routes/ideaRoutes.js"
 import { errorHandler } from "./middlewares/errorHandler.js"
+import connectDB from "./config/db.js"
 
 dotenv.config()
 
 const app = express()
 const PORT = process.env.PORT ?? 8000
+
+// connect to mongoose
+connectDB()
 
 app.use(cors())
 app.use(express.json())
