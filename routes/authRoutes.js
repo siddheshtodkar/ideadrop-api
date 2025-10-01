@@ -1,6 +1,8 @@
 import express from 'express'
 import User from '../models/user.js'
 import { generateToken } from '../utils/generateToken.js'
+import { jwtVerify } from 'jose'
+import { JWT_SECRET } from '../utils/getJwtSecret.js'
 
 const router = express.Router()
 
@@ -9,7 +11,7 @@ const router = express.Router()
 // @access        public
 router.post('/register', async (req, res, next) => {
   try {
-    const { name, email, password } = req.body
+    const { name, email, password } = req.body || {}
     if (!name || !email || !password) {
       res.status(400)
       throw new Error('All fields are required')
@@ -52,7 +54,7 @@ router.post('/register', async (req, res, next) => {
 // @access        public
 router.post('/login', async (req, res, next) => {
   try {
-    const { email, password } = req.body
+    const { email, password } = req.body || {}
     if (!email || !password) {
       res.status(400)
       throw new Error('Email and password are required')
@@ -108,6 +110,40 @@ router.post('/logout', (req, res) => {
     sameSite: 'none'
   })
   res.status(200).json({ message: 'Logged out successfully' })
+})
+
+// @route         POST api/auth/refresh
+// @description   Generate new access token from refresh token
+// @access        public (Needs valid refresh token in cookie)
+router.post('/refresh', async (req, res, next) => {
+  try {
+    const token = req.cookies?.refreshToken
+    console.log('Refreshing Token...');
+    if (!token) {
+      res.status(401)
+      throw new Error('No refresh token')
+    }
+
+    const { payload } = await jwtVerify(token, JWT_SECRET)
+    const user = await User.findById(payload.userId)
+    if (!user) {
+      res.status(401)
+      throw new Error('No user')
+    }
+
+    const accessToken = await generateToken({ userId: user._id.toString() }, '1m')
+    res.json({
+      accessToken,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+      }
+    })
+  } catch (error) {
+    res.status(401)
+    next(error)
+  }
 })
 
 export default router

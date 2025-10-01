@@ -47,7 +47,7 @@ router.get('/:id', async (req, res, next) => {
 // @access        public
 router.post('/', async (req, res, next) => {
   try {
-    const { title, summary, description, tags } = req.body
+    const { title, summary, description, tags } = req.body || {}
     if (!title?.trim() || !summary?.trim() || !description?.trim()) {
       res.status(400)
       throw new Error('title, summary and description are required')
@@ -96,7 +96,7 @@ router.put('/:id', async (req, res, next) => {
       res.status(404)
       throw new Error('Idea Not Found')
     }
-    const { title, summary, description, tags } = req.body
+    const { title, summary, description, tags } = req.body || {}
     if (!title?.trim() || !summary?.trim() || !description?.trim()) {
       res.status(400)
       throw new Error('title, summary and description are required')
