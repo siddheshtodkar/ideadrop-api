@@ -11,7 +11,7 @@ export const protect = async (req, res, next) => {
     }
     const token = autheHeader.split(' ')[1]
     const { payload } = await jwtVerify(token, JWT_SECRET)
-    const user = User.findById(payload.userId).select('_id name email')
+    const user = await User.findById(payload.userId).select('_id name email')
     if (!user) {
       res.status(401)
       throw new Error('User not found')
