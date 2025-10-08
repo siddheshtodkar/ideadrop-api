@@ -19,7 +19,7 @@ connectDB()
 const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:4200',
-  'https://ideadrop-ui-blush.vercel.app/'
+  'https://ideadrop-ui-blush.vercel.app'
 ]
 
 app.use(cors({
@@ -42,6 +42,11 @@ app.use((req, res, next) => {
 
 // Middlewares
 app.use(errorHandler)
+
+app.use((req, res, next) => {
+  console.log("Origin header:", req.headers.origin);
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`server is running at port ${PORT}`)
